@@ -4,6 +4,7 @@ import { User } from '@/lib/definitions';
 import { createUser, updateUser } from '@/lib/actions';
 import { State } from '@/lib/definitions';
 import { useActionState } from 'react';
+import { toast } from 'sonner';
 
 export function CreateUserForm({ formRef, onSubmitSuccess: onSubmitSuccess }:
     {
@@ -13,10 +14,18 @@ export function CreateUserForm({ formRef, onSubmitSuccess: onSubmitSuccess }:
 ) {
     const initialState: State = { message: null, errors: {} };
     const action = async (prevState: State, formData: FormData) => {
-        const result: State = await createUser(prevState, formData);
+        let result: State;
+        try {
+            result = await createUser(prevState, formData);
+        } catch (error) {
+            toast.error('Failed to create user.');
+            return prevState;
+        }
         if (result.errors && Object.keys(result.errors).length > 0) {
+            toast.error('Failed to create user.');
             return result;
         }
+        toast.success('User created successfully!');
         onSubmitSuccess?.();
         return result;
     };
@@ -108,13 +117,21 @@ export function UpdateUserForm({ user, formRef, onSubmitSuccess }:
         onSubmitSuccess?: () => void
     }
 ) {
-    const updateUserWithId = updateUser.bind(null, user.id);
+    const updateUserWithId = updateUser.bind(null, user.id!);
     const initialState: State = { message: null, errors: {} };
     const action = async (prevState: State, formData: FormData) => {
-        const result: State = await updateUserWithId(prevState, formData);
+        let result: State; 
+        try {
+            result = await updateUserWithId(prevState, formData);
+        } catch (error) {
+            toast.error('Failed to update user.');
+            return prevState;
+        }
         if (result.errors && Object.keys(result.errors).length > 0) {
+            toast.error('Failed to update user.');
             return result;
         }
+        toast.success('User updated successfully!');
         onSubmitSuccess?.();
         return result;
     };

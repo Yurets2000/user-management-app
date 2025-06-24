@@ -12,8 +12,8 @@ export default function UsersTable({ users, onUpdateUser, onDeleteUser }:
   return (
     <div className="mt-6 flow-root">
       <div className="inline-block min-w-full align-middle">
-        <div className="rounded-lg bg-gray-50 p-2 pt-0">
-          <table className="min-w-full text-gray-900 table-fixed">
+        <div className="rounded-lg bg-gray-100 p-2">
+          <table className="min-w-full bg-white table-fixed">
             <thead className="rounded-lg text-left text-sm font-normal">
               <tr>
                 <th scope="col" className="px-3 py-5 font-medium">
@@ -30,11 +30,11 @@ export default function UsersTable({ users, onUpdateUser, onDeleteUser }:
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white">
+            <tbody>
               {users?.map((user) => (
                 <tr
                   key={user.id}
-                  className="border-b py-3 text-sm last-of-type:border-none [&:first-child>td:first-child]:rounded-tl-lg [&:first-child>td:last-child]:rounded-tr-lg [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg"
+                  className="border-b-4 border-gray-100 py-3 text-sm first-of-type:border-t-4 last-of-type:border-none [&:first-child>td:first-child]:rounded-tl-lg [&:first-child>td:last-child]:rounded-tr-lg [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg"
                 >
                   <td className="whitespace-nowrap px-3 py-3">
                     {user.name}
@@ -47,8 +47,8 @@ export default function UsersTable({ users, onUpdateUser, onDeleteUser }:
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
                     <div className="flex gap-3">
-                      <UpdateUserButton id={user.id} onClick={onUpdateUser} />
-                      <DeleteUserButton id={user.id} onClick={onDeleteUser} />
+                      <UpdateUserButton id={user.id!} onClick={onUpdateUser} />
+                      <DeleteUserButton id={user.id!} onClick={onDeleteUser} />
                     </div>
                   </td>
                 </tr>

@@ -3,7 +3,7 @@
 import { z } from 'zod';
 import { State, User } from '@/lib/definitions'
 import { revalidatePath } from 'next/cache';
-import { DATA } from './data';
+import { createUserDB, updateUserDB, deleteUserDB, deleteAllUsersDB, upsertUsersDB } from './data';
 
 const FormSchema = z.object({
     id: z.string(),
@@ -27,39 +27,38 @@ const FormSchema = z.object({
 
 const CreateUser = FormSchema.omit({ id: true });
 
-export async function createUser(prevState: State, formData: FormData) {
-  const validatedFields = CreateUser.safeParse({
-    name: formData.get('name'),
-    email: formData.get('email'),
-    createdAt: formData.get('createdAt'),
-  });
- 
-  if (!validatedFields.success) {
-    return {
-      errors: validatedFields.error.flatten().fieldErrors,
-      message: 'Failed to Create User.',
-    };
-  }
- 
-  const { name, email, createdAt } = validatedFields.data;
+export async function createUser(prevState: State, formData: FormData): Promise<State> {
+    const validatedFields = CreateUser.safeParse({
+        name: formData.get('name'),
+        email: formData.get('email'),
+        createdAt: formData.get('createdAt'),
+    });
 
-  DATA.push({
-        id: (DATA.length + 1).toString(),
+    if (!validatedFields.success) {
+        return {
+            errors: validatedFields.error.flatten().fieldErrors,
+            message: 'Failed to create User.',
+        };
+    }
+
+    const { name, email, createdAt } = validatedFields.data;
+
+    await createUserDB({
         name,
         email,
         createdAt: createdAt.toISOString().split('T')[0],
     });
 
-   revalidatePath('/users');
+    revalidatePath('/users');
     return {
-          message: 'User created successfully.',
-          errors: {},
-     };
+        message: 'User created successfully.',
+        errors: {},
+    };
 }
 
 const UpdateUser = FormSchema.omit({ id: true });
 
-export async function updateUser(id: string, prevState: State, formData: FormData) {
+export async function updateUser(id: string, prevState: State, formData: FormData): Promise<State> {
     const validatedFields = UpdateUser.safeParse({
         name: formData.get('name'),
         email: formData.get('email'),
@@ -69,27 +68,18 @@ export async function updateUser(id: string, prevState: State, formData: FormDat
     if (!validatedFields.success) {
         return {
             errors: validatedFields.error.flatten().fieldErrors,
-            message: 'Failed to Update User.',
+            message: 'Failed to update User.',
         };
     }
 
     const { name, email, createdAt } = validatedFields.data;
 
-    const userIndex = DATA.findIndex(user => user.id === id);
-
-    if (userIndex === -1) {
-        return {
-            message: 'User not found.',
-            errors: { id: ['User with this ID does not exist.'] },
-        };
-    }
-
-    DATA[userIndex] = {
-        ...DATA[userIndex],
+    await updateUserDB({
+        id,
         name,
         email,
         createdAt: createdAt.toISOString().split('T')[0],
-    };
+    });
 
     revalidatePath('/users');
     return {
@@ -98,28 +88,17 @@ export async function updateUser(id: string, prevState: State, formData: FormDat
     };
 }
 
-export async function deleteUser(id: string) {
-    const userIndex = DATA.findIndex(user => user.id === id);
-    if (userIndex === -1) {
-        throw new Error('User not found.');
-    }
-    DATA.splice(userIndex, 1);
+export async function deleteUser(id: string): Promise<void> {
+    await deleteUserDB(id);
     revalidatePath('/users');
 }
 
-export async function uploadUsers(users: User[]) {
-    users.forEach(user => {
-        const existingUserIndex = DATA.findIndex(u => u.id === user.id);
-        if (existingUserIndex !== -1) {
-            DATA[existingUserIndex] = user; // Update existing user
-        } else {
-            DATA.push(user); // Add new user
-        }
-    });
+export async function uploadUsers(users: User[]): Promise<void> {
+    await upsertUsersDB(users);
     revalidatePath('/users');
 }
 
-export async function deleteAllUsers() {
-    DATA.length = 0; // Clear the user data array
+export async function deleteAllUsers(): Promise<void> {
+    await deleteAllUsersDB();
     revalidatePath('/users');
 }

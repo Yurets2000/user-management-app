@@ -19,7 +19,7 @@ export default function ModalPopup({ onSave, onClose, title, description, childr
           </div>
           <div className="flex items-start">
             <button onClick={onClose} className="text-gray-500 hover:text-gray-600">
-              <XMarkIcon className="w-6 h-6" />
+              <XMarkIcon className="w-6 h-6 hover:cursor-pointer" />
             </button>
           </div>
         </div>
@@ -27,8 +27,8 @@ export default function ModalPopup({ onSave, onClose, title, description, childr
           {children}
         </div>
         <div className="flex justify-end gap-2">
-            <button type="button" onClick={onSave} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-500">Save</button>
-            <button type="button" onClick={onClose} className="bg-white text-black px-4 py-2 rounded border hover:bg-gray-100">Close</button>
+            <button type="button" onClick={onSave} className="bg-black text-white px-4 py-2 rounded-lg text-sm font-medium border border-black hover:bg-gray-800 hover:cursor-pointer">Save</button>
+            <button type="button" onClick={onClose} className="bg-white text-black px-4 py-2 rounded-lg text-sm font-medium border hover:bg-gray-100 hover:cursor-pointer">Close</button>
         </div>
       </div>
     </div>

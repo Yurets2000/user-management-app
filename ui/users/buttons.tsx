@@ -4,6 +4,7 @@ import { PencilIcon, TrashIcon, ArrowUpTrayIcon } from '@heroicons/react/24/outl
 import { deleteUser, deleteAllUsers } from '@/lib/actions';
 import { useUploadUsers } from '@/lib/hooks';
 import React, { useRef } from 'react';
+import { toast } from 'sonner';
 
 export function CreateUserButton({ onClick }:
   {
@@ -12,7 +13,7 @@ export function CreateUserButton({ onClick }:
   return (
     <button
       type="button"
-      className="flex h-10 items-center rounded-lg bg-blue-600 px-4 text-sm font-medium text-white transition-colors hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+      className="flex border items-center rounded-lg bg-black py-3 px-4 text-sm font-medium text-white transition-colors hover:bg-gray-800 hover:cursor-pointer"
       onClick={onClick}
     >
       <span>Create New</span>
@@ -32,8 +33,9 @@ export function UploadUsersButton({ onClick }:
         if (!file) return;
         try {
           await upload(file);
+          toast.success('Users uploaded successfully!');
         } catch (err) {
-          console.error('Error uploading file:', err);
+          toast.error('Failed to upload users.');
         } finally {
           e.target.value = '';
         }
@@ -50,7 +52,7 @@ export function UploadUsersButton({ onClick }:
       />
       <button
         type="button"
-        className="flex gap-2 rounded-md border p-2 hover:bg-gray-100"
+        className="flex items-center gap-2 rounded-lg border py-3 px-4 text-sm font-medium transition-colors hover:bg-gray-100 hover:cursor-pointer"
         onClick={() => {
           onClick?.();
           fileInputRef.current?.click();
@@ -71,7 +73,7 @@ export function UpdateUserButton({ id, onClick }:
   return (
     <button
       type="button"
-      className="rounded-md border p-2 hover:bg-gray-100"
+      className="rounded-md border p-2 hover:bg-gray-100 hover:cursor-pointer"
       onClick={() => onClick?.(id)}
     >
       <PencilIcon className="w-5" />
@@ -85,11 +87,19 @@ export function DeleteUserButton({ id, onClick }:
     onClick?: (userId: string) => void
   }) {
   const deleteUserWithId = deleteUser.bind(null, id);
+  const action = async (formData: FormData) => {
+    try {
+      await deleteUserWithId();
+      toast.success('User deleted successfully!');
+    } catch (error) {
+      toast.error('Failed to delete user.');
+    }
+  }
   return (
-    <form action={deleteUserWithId}>
+    <form action={action}>
       <button
         type="submit"
-        className="rounded-md border p-2 hover:bg-gray-100"
+        className="rounded-md border p-2 hover:bg-gray-100 hover:cursor-pointer"
         onClick={() => onClick?.(id)}
       >
         <TrashIcon className="w-5" />
@@ -102,11 +112,19 @@ export function DeleteAllUsersButton({ onClick }:
   {
     onClick?: () => void
   }) {
+  const action = async (formData: FormData) => {
+    try {
+      await deleteAllUsers();
+      toast.success('All users deleted successfully!');
+    } catch (error) {
+      toast.error('Failed to delete all users.');
+    }
+  }
   return (
-    <form action={deleteAllUsers}>
+    <form action={action}>
     <button
       type="submit"
-      className="flex gap-2 rounded-md border p-2 hover:bg-gray-100"
+      className="flex items-center gap-2 rounded-lg border py-3 px-4 text-sm font-medium transition-colors hover:bg-gray-100 hover:cursor-pointer"
       onClick={onClick}
     >
       <TrashIcon className="w-5" />
